@@ -34,3 +34,6 @@ coverage.xml
 
 # pytest cache
 .pytest_cache/
+
+package/
+deployment-package.zip
