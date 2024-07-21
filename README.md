@@ -1,1 +1,1 @@
-![reddit-news-bot](https://github.com/user-attachments/assets/b0afb328-4463-425c-97db-b6089a9796e3)
+![eq2-news-bot](https://github.com/user-attachments/assets/3f442346-9b4f-4e67-92fb-4c9ca89d54cf)
