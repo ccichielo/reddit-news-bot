@@ -1,13 +1,10 @@
-import os
 import re
 import html2text
-from reddit_poster import RedditPoster
-from content_scraper import get_latest_post
+from reddit_news_bot.secrets import get_secret
+from reddit_news_bot.dynamo_connection import DynamoConnection
+from reddit_news_bot.reddit_poster import RedditPoster
+from reddit_news_bot.content_scraper import get_latest_post
 
-REDDIT_API_CLIENT = os.environ['REDDIT_API_CLIENT']
-REDDIT_API_SECRET = os.environ['REDDIT_API_SECRET']
-REDDIT_USER = os.environ['REDDIT_USER']
-REDDIT_PASSWORD = os.environ['REDDIT_PASSWORD']
 
 # real
 # NEWS_FLAIR = "4b9a56d8-550e-11ea-9b5f-0eb649837073"
@@ -23,23 +20,37 @@ ANNOUNCEMENTS_URL = "https://forums.everquest2.com/index.php?forums/announcement
 UPDATE_NOTES_URL = "https://forums.everquest2.com/index.php?forums/update-notes.12/"
 ROOT_URL = "https://forums.everquest2.com"
 
+TABLE_NAME = "eq2-news-history"
 
-def main():
-    reddit_poster = RedditPoster(REDDIT_API_CLIENT, REDDIT_API_SECRET, REDDIT_USER, REDDIT_PASSWORD, SUBREDDIT_NAME)
+def handler(event, context):
+    secret = get_secret()
+    reddit_poster = RedditPoster(
+        username=secret['reddit_user'],
+        password=secret['reddit_password'],
+        client_id=secret['reddit_api_client'],
+        client_secret=secret['reddit_api_secret'], 
+        subreddit_name=SUBREDDIT_NAME
+    )
+    dynamo_connection = DynamoConnection(TABLE_NAME)
 
     sticky_class_name='structItemContainer-group structItemContainer-group--sticky'
     thread_list_class_name='structItemContainer-group js-threadList'
     announcement_title, announcement_latest_sticky_content, announcement_post_url = get_latest_post(ROOT_URL, ANNOUNCEMENTS_URL, sticky_class_name)
     update_notes_title, update_notes_latest_post_content, update_notes_post_url = get_latest_post(ROOT_URL, UPDATE_NOTES_URL, thread_list_class_name)
 
-    announcement_markdown = __clean_and_convert_html_to_markdown(announcement_latest_sticky_content)
-    update_notes_markdown = __clean_and_convert_html_to_markdown(update_notes_latest_post_content)
+    __post_if_not_already_posted(reddit_poster, dynamo_connection, announcement_title, announcement_latest_sticky_content, announcement_post_url)
+    __post_if_not_already_posted(reddit_poster, dynamo_connection, update_notes_title, update_notes_latest_post_content, update_notes_post_url)
 
-    announcement_markdown = __add_link_and_bot_tag(announcement_post_url, announcement_markdown)
-    update_notes_markdown = __add_link_and_bot_tag(update_notes_post_url, update_notes_markdown)
+def __post_if_not_already_posted(reddit_poster: RedditPoster, dynamo_connection: DynamoConnection, title, content, url):
+    if dynamo_connection.item_exists(url):
+        print(f'Already posted item with url: {url}')
+        return
 
-    reddit_poster.submit(announcement_title, announcement_markdown, NEWS_FLAIR)
-    reddit_poster.submit(update_notes_title, update_notes_markdown, NEWS_FLAIR)
+    markdown = __clean_and_convert_html_to_markdown(content)
+    markdown = __add_link_and_bot_tag(url, markdown)
+    reddit_poster.submit(title, markdown, NEWS_FLAIR)
+
+    dynamo_connection.add_item(url)
 
 def __add_link_and_bot_tag(post_url, markdown_content):
     link_markdown = f'[{post_url}]({post_url})\n\n'
@@ -66,6 +77,3 @@ def __post_process_markdown(markdown_content):
     markdown_content = re.sub(r'<[^>]+>', '', markdown_content)
 
     return markdown_content
-
-if __name__ == "__main__":
-    main()
