@@ -2,7 +2,7 @@
 name = "reddit-news-bot"
 version = "0.1.0"
 description = ""
-authors = ["chris.cichielo@gmail.com"]
+authors = ["Christopher Cichielo <chris.cichielo@gmail.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
@@ -11,6 +11,7 @@ praw = "^7.7.1"
 requests = "^2.32.3"
 beautifulsoup4 = "^4.12.3"
 pytest = "^8.3.1"
+html2text = "^2024.2.26"
 
 
 [build-system]

@@ -157,6 +157,16 @@ files = [
 test = ["pytest (>=6)"]
 
 [[package]]
+name = "html2text"
+version = "2024.2.26"
+description = "Turn HTML into equivalent Markdown-structured text."
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "html2text-2024.2.26.tar.gz", hash = "sha256:05f8e367d15aaabc96415376776cdd11afd5127a77fce6e36afc60c563ca2c32"},
+]
+
+[[package]]
 name = "idna"
 version = "3.7"
 description = "Internationalized Domain Names in Applications (IDNA)"
@@ -367,4 +377,4 @@ test = ["websockets"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "129c0e954911f96b134031113cf761905cad10cf72645f83f70b152abc9162d0"
+content-hash = "d4899bc7a710f53d1c082d4086a730d085c76e2533965a447e3be4b9437153be"
